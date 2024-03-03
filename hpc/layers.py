@@ -2,7 +2,7 @@ import torch
 import torch.nn.functional as F
 from torch.nn import Sequential, Linear, SiLU
 from torch_geometric.nn import MessagePassing
-# from torch_scatter import scatter
+from torch_scatter import scatter
 
 class PositionalNNConvLayer(MessagePassing):
     def __init__(self, in_channels, hidden_channels, nn, edge_dim=4, aggr='mean'):

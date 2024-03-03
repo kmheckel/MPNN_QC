@@ -14,12 +14,15 @@ def train(model, args):
         data = data.to(args.device)
         args.optimizer.zero_grad()
         y_pred = model(data)
+        # print(y_pred.shape, data.y.shape)
         loss = F.mse_loss(y_pred, data.y)
+        # loss = F.l1_loss(y_pred * args.std, data.y * args.std)
+        # loss = F.l1_loss(y_pred, data.y)
+        # loss =  F.mse_loss(y_pred * args.std, data.y * args.std)
         loss.backward()
         loss_all += loss.item() * data.num_graphs
         args.optimizer.step()
     return loss_all / len(args.train_loader.dataset)
-
 
 def eval(model, loader, args):
     model.eval()
@@ -29,8 +32,11 @@ def eval(model, loader, args):
         with torch.no_grad():
             y_pred = model(data)
             # Mean Absolute Error using std (computed when preparing data)
-            error += (y_pred * args.std - data.y * args.std).abs().sum().item()
-    return error / len(loader.dataset)
+            # print(y_pred.shape, data.y.shape)
+            # error += (y_pred * args.std - data.y * args.std).abs().sum().item()
+            error += F.l1_loss(y_pred * args.std, data.y * args.std,
+                               reduction='sum').item()
+    return error / len(loader.dataset) / args.output_channels
 
 def run_experiment(model, args):
     print(f"Running experiment for {args.model_name}, training on {len(args.train_loader.dataset)} samples for {args.num_epochs} epochs.")
@@ -46,8 +52,8 @@ def run_experiment(model, args):
     print(f'Total parameters: {total_param}')
     model = model.to(args.device)
 
-    args.optimizer = torch.optim.Adam(model.parameters(), lr=args.initial_lr,
-                                      weight_decay=1e-16)
+    args.optimizer = torch.optim.Adam(model.parameters(), lr=args.initial_lr)
+                                    #   weight_decay=1e-16)
 
     # Pre-calculate the decay factors for each epoch in the decaying region
     decay_start_epoch = int(args.num_epochs * 0.9)
