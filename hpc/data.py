@@ -31,9 +31,9 @@ def get_data(args):
         val_dataset = dataset[10000:20000]
         train_dataset = dataset[20000:]
     else:
-        test_dataset = dataset[:500]
-        val_dataset = dataset[500:1000]
-        train_dataset = dataset[1000:1500]
+        test_dataset = dataset[:1000]
+        val_dataset = dataset[1000:2000]
+        train_dataset = dataset[2000:3000]
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False)

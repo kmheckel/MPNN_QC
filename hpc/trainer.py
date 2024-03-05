@@ -14,11 +14,7 @@ def train(model, args):
         data = data.to(args.device)
         args.optimizer.zero_grad()
         y_pred = model(data)
-        # print(y_pred.shape, data.y.shape)
         loss = F.mse_loss(y_pred, data.y)
-        # loss = F.l1_loss(y_pred * args.std, data.y * args.std)
-        # loss = F.l1_loss(y_pred, data.y)
-        # loss =  F.mse_loss(y_pred * args.std, data.y * args.std)
         loss.backward()
         loss_all += loss.item() * data.num_graphs
         args.optimizer.step()
@@ -33,9 +29,9 @@ def eval(model, loader, args):
             y_pred = model(data)
             # Mean Absolute Error using std (computed when preparing data)
             # print(y_pred.shape, data.y.shape)
-            # error += (y_pred * args.std - data.y * args.std).abs().sum().item()
-            error += F.l1_loss(y_pred * args.std, data.y * args.std,
-                               reduction='sum').item()
+            error += (y_pred * args.std - data.y * args.std).abs().sum().item()
+            # error += F.l1_loss(y_pred * args.std, data.y * args.std,
+            #                    reduction='sum').item()
     return error / len(loader.dataset) / args.output_channels
 
 def run_experiment(model, args):
