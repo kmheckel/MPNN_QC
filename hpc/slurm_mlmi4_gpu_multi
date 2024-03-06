@@ -93,6 +93,7 @@ cd $workdir
 echo -e "Changed directory to `pwd`.\n"
 mkdir -p logs
 
+# IN CASE YOU WANT TO LOOP OVER HYPERPARAMS:
 # lrs=(0.01 0.1 1)
 # # Loop over configurations
 # for lr in "${lrs[@]}"; do
@@ -107,192 +108,18 @@ mkdir -p logs
 #     eval $CMD > $log_file
 # done
 
-# EXTRA
+
 # Build the options string
 options="--num_epochs=540 --patience=100"
 # Command to run
 CMD="python -u run.py $options"
 # Log file for this iteration
-log_file="logs/NNConv_target_0_base_settings_run1.$SLURM_JOB_ID"
+log_file="logs/TowerNNConv_target_0_base_settings_run1.$SLURM_JOB_ID"
 # Execute the command and redirect output to log file
 echo "Executing: $CMD > $log_file"
 eval $CMD > $log_file
 
-# # Build the options string
-# options="--dropout=0.5 --clip=2 --lr=0.5 --scheduler=True --num_layers=2 --model_dims=420 --bidirectional=False"
-# # Command to run
-# CMD="python -u run.py $options"
-# # Log file for this iteration
-# log_file="logs/420_2lstm_unidirectional_drop_0.5.$SLURM_JOB_ID"
-# # Execute the command and redirect output to log file
-# echo "Executing: $CMD > $log_file"
-# eval $CMD > $log_file
 
-# # Build the options string
-# options="--dropout=0.5 --clip=2 --lr=0.5 --scheduler=True --num_layers=2 --model_dims=420 --bidirectional=False --train_json=train_fbank_augmented.json"
-# # Command to run
-# CMD="python -u run.py $options"
-# # Log file for this iteration
-# log_file="logs_augmented/420_2lstm_unidirectional_dropout_0.5.$SLURM_JOB_ID"
-# # Execute the command and redirect output to log file
-# echo "Executing: $CMD > $log_file"
-# eval $CMD > $log_file
-
-# # Build the options string
-# options="--dropout=0.5 --clip=2 --lr=0.5 --num_layers=2 --model_dims=420 --vocab=vocab_61.txt --train_json=train_p61_fbank.json --decode_type=argmax --bidirectional=False"
-# # Command to run
-# CMD="python -u run.py $options"
-# # Log file for this iteration
-# log_file="logs/p61_argmax_scheduled_EXTRA420_unidirectional_lr=0.5_dropout_0.5.$SLURM_JOB_ID"
-# # Execute the command and redirect output to log file
-# echo "Executing: $CMD > $log_file"
-# eval $CMD > $log_file
-
-# # Build the options string
-# options="--seed=0 --dropout=0.5 --clip=2 --lr=0.5 --num_layers=2 --model_dims=420 --vocab=vocab_61.txt --train_json=train_p61_fbank.json --decode_type=sum --bidirectional=False"
-# # Command to run
-# CMD="python -u run.py $options"
-# # Log file for this iteration
-# log_file="logs/p61_sum_scheduled_2_EXTRA420_unidirectional_lr=0.5_dropout_0.5.$SLURM_JOB_ID"
-# # Execute the command and redirect output to log file
-# echo "Executing: $CMD > $log_file"
-# eval $CMD > $log_file
-
-
-# ###############################################################################################
-# # Build the options string
-# options="--dropout=0.5 --clip=2 --lr=0.5 --num_layers=2 --model_dims=256 --vocab=vocab_61.txt --train_json=train_p61_fbank.json --decode_type=argmax"
-# # Command to run
-# CMD="python -u run.py $options"
-# # Log file for this iteration
-# log_file="logs/p61_argmax_scheduled_EXTRA_bidirectional_lr=0.5_dropout_0.5.$SLURM_JOB_ID"
-# # Execute the command and redirect output to log file
-# echo "Executing: $CMD > $log_file"
-# eval $CMD > $log_file
-
-# # Build the options string
-# options="--dropout=0.5 --clip=2 --lr=0.5 --num_layers=2 --model_dims=256 --vocab=vocab_61.txt --train_json=train_p61_fbank.json --decode_type=sum"
-# # Command to run
-# CMD="python -u run.py $options"
-# # Log file for this iteration
-# log_file="logs/p61_sum_scheduled_EXTRA_bidirectional_lr=0.5_dropout_0.5.$SLURM_JOB_ID"
-# # Execute the command and redirect output to log file
-# echo "Executing: $CMD > $log_file"
-# eval $CMD > $log_file
-
-# # Build the options string
-# options="--dropout=0.5 --model_dims=256 --clip=2 --lr=0.5 --num_layers=2 --vocab=vocab_61.txt --train_json=train_p61_fbank.json --decode_type=sum --bidirectional=False"
-# # Command to run
-# CMD="python -u run.py $options"
-# # Log file for this iteration
-# log_file="logs/p61_sum_scheduled_EXTRA_unidirectional_lr=0.5_dropout_0.5.$SLURM_JOB_ID"
-# # Execute the command and redirect output to log file
-# echo "Executing: $CMD > $log_file"
-# eval $CMD > $log_file
-
-# # Build the options string
-# options="--dropout=0.5 --model_dims=256 --clip=2 --lr=0.5 --num_layers=2 --vocab=vocab_61.txt --train_json=train_p61_fbank.json --decode_type=argmax --bidirectional=False"
-# # Command to run
-# CMD="python -u run.py $options"
-# # Log file for this iteration
-# log_file="logs/p61_argmax_scheduled_EXTRA_unidirectional_lr=0.5_dropout_0.5.$SLURM_JOB_ID"
-# # Execute the command and redirect output to log file
-# echo "Executing: $CMD > $log_file"
-# eval $CMD > $log_file
-
-
-
-# # Build the options string
-# options="--dropout=0.2 --clip=2 --lr=1.0 --proj_layers=2"
-# # Command to run
-# CMD="python -u run.py $options"
-# # Log file for this iteration
-# log_file="logs/2_proj_layers_lr=1_dropout_0.2.$SLURM_JOB_ID"
-# # Execute the command and redirect output to log file
-# echo "Executing: $CMD > $log_file"
-# eval $CMD > $log_file
-
-# # Build the options string
-# options="--dropout=0.2 --clip=2 --lr=0.25 --proj_layers=2"
-# # Command to run
-# CMD="python -u run.py $options"
-# # Log file for this iteration
-# log_file="logs/2_proj_layers_lr=0.25_dropout_0.2.$SLURM_JOB_ID"
-# # Execute the command and redirect output to log file
-# echo "Executing: $CMD > $log_file"
-# eval $CMD > $log_file
-
-# # Build the options string
-# options="--dropout=0.2 --clip=2 --lr=0.5 --proj_layers=2 --bidirectional=False"
-# # Command to run
-# CMD="python -u run.py $options"
-# # Log file for this iteration
-# log_file="logs/2_proj_layers_unidirectional_lr=0.5_dropout_0.2.$SLURM_JOB_ID"
-# # Execute the command and redirect output to log file
-# echo "Executing: $CMD > $log_file"
-# eval $CMD > $log_file
-
-
-###############################################################################################
-
-# export train="train_fbank_augmented.json"
-# # export valid="dev_fbank_augmented.json"
-# # export test="test_fbank_augmented.json"
-
-# # Build the options string
-# options="--dropout=0.4 --clip=2 --lr=0.5 --scheduler=True --num_layers=2 --train_json=$train"
-# # Command to run
-# CMD="python -u run.py $options"
-# # Log file for this iteration
-# log_file="logs_augmented/2_lstm_layers_bidirectional_lr=0.5_dropout_0.4.$SLURM_JOB_ID"
-# # Execute the command and redirect output to log file
-# echo "Executing: $CMD > $log_file"
-# eval $CMD > $log_file
-
-# # same with unidirectional
-# # Build the options string
-# options="--dropout=0.4 --clip=2 --lr=0.5 --scheduler=True --num_layers=2 --train_json=$train --bidirectional=False"
-# # Command to run
-# CMD="python -u run.py $options"
-# # Log file for this iteration
-# log_file="logs_augmented/2_lstm_layers_unidirectional_lr=0.5_dropout_0.4.$SLURM_JOB_ID"
-# # Execute the command and redirect output to log file
-# echo "Executing: $CMD > $log_file"
-# eval $CMD > $log_file
-
-# # EXTRA
-# # Build the options string
-# options="--dropout=0.5 --clip=2 --lr=0.5 --scheduler=True --num_layers=2 --model_dims=256 --train_json=$train"
-# # Command to run
-# CMD="python -u run.py $options"
-# # Log file for this iteration
-# log_file="logs_augmented/EXTRA_256_bidirectional_width_2_lstm_layers_lr=0.5_dropout_0.5.$SLURM_JOB_ID"
-# # Execute the command and redirect output to log file
-# echo "Executing: $CMD > $log_file"
-# eval $CMD > $log_file
-
-# # same with unidirectional
-# # Build the options string
-# options="--dropout=0.5 --clip=2 --lr=0.5 --scheduler=True --num_layers=2 --model_dims=256 --bidirectional=False --train_json=$train"
-# # Command to run
-# CMD="python -u run.py $options"
-# # Log file for this iteration
-# log_file="logs_augmented/EXTRA_256_unidirectional_width_2_lstm_layers_lr=0.5_dropout_0.5.$SLURM_JOB_ID"
-# # Execute the command and redirect output to log file
-# echo "Executing: $CMD > $log_file"
-# eval $CMD > $log_file
-
-###############################################################################################
-
-# # Build the options string
-# options="--dropout=0.4 --clip=2 --lr=1.0 --scheduler=True --num_layers=2"
-# # Command to run
-# CMD="python -u run.py $options"
-# # Log file for this iteration
-# log_file="logs/2_lstm_layers_lr=1_dropout_0.4.$SLURM_JOB_ID"
-# # Execute the command and redirect output to log file
-# echo "Executing: $CMD > $log_file"
-# eval $CMD > $log_file
 
 # JOBID=$SLURM_JOB_ID
 # CMD="$application $options > logs/out.$JOBID"
