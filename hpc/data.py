@@ -8,8 +8,9 @@ def get_data(args):
     else:
         dataset = QM9(root='./tmp/QM9').shuffle()
     if args.predict_all:
-        # get first 12 targets
-        dataset.data.y = dataset.data.y[:, :12]
+        # get the 12 targets
+        targets = [0, 1, 2, 3, 4, 5, 6, 11, 12, 13, 14, 15]
+        dataset.data.y = dataset.data.y[:, targets]
         # standardize targets
         mean = dataset.data.y.mean(dim=0, keepdim=True)
         std = dataset.data.y.std(dim=0, keepdim=True)

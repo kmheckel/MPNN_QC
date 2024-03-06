@@ -29,7 +29,6 @@ class GNN(torch.nn.Module):
         self.args = args
         self.gru = GRU(hidden_channels, hidden_channels)
         self.nl = SiLU()
-        self.num_layers = num_layers
 
         # Define the MLP for transforming edge features for NNConv
         if 'nnconv' in model_name.lower():
@@ -78,23 +77,23 @@ class GNN(torch.nn.Module):
             torch.Tensor: Output tensor.
         """
         x = self.nl(self.first_layer(data.x))
-        h = x.unsqueeze(0)  # Add singleton dimension for edge features
+        h = x.unsqueeze(0).contiguous()  # Add singleton dimension for edge features
         # for conv in self.convs:
         for _ in range(self.num_layers):
             if self.edge_attr_exists:
                 m = self.nl(self.conv(x, data.edge_index, edge_attr=data.edge_attr))
-                x, h = self.gru(m.unsqueeze(0), h)
+                x, h = self.gru(m.unsqueeze(0), h.contiguous())
                 x = x.squeeze(0)
             else:
                 x = self.nl(self.conv(x, data.edge_index))
-                x, h = self.gru(x.unsqueeze(0), h)
+                x, h = self.gru(x.unsqueeze(0), h.contiguous())
                 x = x.squeeze(0)
         x = self.aggr(x, data.batch)
         if not self.args.predict_all or not self.args.use_branching:
             x = self.out(x)
         else:
             x = torch.cat([out_net(x) for out_net in self.out_nets], dim=1)
-        return x.squeeze()
+        return x.squeeze(-1)
 
 
 class TowerNNConv(torch.nn.Module):
@@ -123,22 +122,22 @@ class TowerNNConv(torch.nn.Module):
         self.num_towers = num_towers
         self.tower_dim = hidden_channels // num_towers
         self.args = args
-        args.model_name = model_name
         self.nnconv = 'nnconv' in model_name.lower()
         
         # Initial transformation
         self.first_layer = Linear(input_channels, hidden_channels)
-        self.gru = GRU(self.tower_dim, self.tower_dim)
+        self.grus = torch.nn.ModuleList([GRU(self.tower_dim, self.tower_dim) for _ in range(num_towers)])
         self.nl = SiLU()
         
         # Edge MLP for NNConv
         if self.nnconv:
-            self.nn = Sequential(Linear(edge_feat_dim, self.tower_dim * nn_width_factor),
-                                SiLU(), Linear(self.tower_dim * nn_width_factor, self.tower_dim ** 2))
+            self.nns = torch.nn.ModuleList([Sequential(Linear(edge_feat_dim, self.tower_dim * nn_width_factor),
+                                SiLU(), Linear(self.tower_dim * nn_width_factor, self.tower_dim ** 2)) for _ in range(num_towers)])
+
         # Towers for each convolution layer
         if self.nnconv:
             self.towers = torch.nn.ModuleList([
-                NNConv(self.tower_dim, self.tower_dim, self.nn) for _ in range(num_towers)
+                NNConv(self.tower_dim, self.tower_dim, self.nns[i]) for i in range(num_towers)
             ])
         elif 'ggnn' in model_name.lower():
             self.towers = torch.nn.ModuleList([
@@ -171,20 +170,18 @@ class TowerNNConv(torch.nn.Module):
             torch.Tensor: Output tensor.
         """
         x = self.nl(self.first_layer(data.x))
-        
         # Split the embeddings into towers
         towers_embeddings = x.split(self.tower_dim, dim=1)
-        
         # Process each tower separately
         updated_towers = []
         for i, tower in enumerate(self.towers):
-            h = towers_embeddings[i].unsqueeze(0)
+            h = towers_embeddings[i].unsqueeze(0).contiguous()  # Ensure h is contiguous
             for _ in range(self.num_layers):
                 if self.nnconv:
                     tower_output = self.nl(tower(towers_embeddings[i], data.edge_index, edge_attr=data.edge_attr))
                 else:
                     tower_output = self.nl(tower(towers_embeddings[i], data.edge_index))
-                tower_output, h = self.gru(tower_output.unsqueeze(0), h)
+                tower_output, h = self.grus[i](tower_output.unsqueeze(0), h.contiguous())
                 tower_output = tower_output.squeeze(0)
             updated_towers.append(tower_output)
         
@@ -195,7 +192,7 @@ class TowerNNConv(torch.nn.Module):
         # Aggregate and output
         x = self.aggr(mixed_embeddings, data.batch)
         x = self.out(x)
-        return x.squeeze()
+        return x.squeeze(-1)
 
 
 class EGNN(torch.nn.Module):
@@ -215,7 +212,6 @@ class EGNN(torch.nn.Module):
         self.num_layers = num_layers
         self.first_layer = Linear(input_channels, hidden_channels)
         self.nl = SiLU()
-        self.num_layers = num_layers
         self.predictor1 = Sequential(Linear(hidden_channels, hidden_channels), SiLU(),
                                     Linear(hidden_channels, hidden_channels))
         self.predictor2 = Sequential(Linear(hidden_channels, hidden_channels), SiLU(),
@@ -240,7 +236,7 @@ class EGNN(torch.nn.Module):
         x = self.predictor1(x)
         x = global_add_pool(x, data.batch)
         x = self.predictor2(x)
-        return x.squeeze()
+        return x.squeeze(-1)
 
 
 
@@ -254,7 +250,6 @@ class EGNN(torch.nn.Module):
 #         self.first_layer = Linear(input_channels, hidden_channels)
 #         self.convs = torch.nn.ModuleList()
 #         self.nl = SiLU()
-#         self.num_layers = num_layers
 #         self.gru = GRU(hidden_channels, hidden_channels)
 #         self.nnconv = 'nnconv' in model_name.lower()
 

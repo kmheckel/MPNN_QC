@@ -110,11 +110,11 @@ mkdir -p logs
 
 
 # Build the options string
-options="--num_epochs=540 --patience=100"
+options="--spatial=True --target=0"
 # Command to run
 CMD="python -u run.py $options"
 # Log file for this iteration
-log_file="logs/TowerNNConv_target_0_base_settings_run1.$SLURM_JOB_ID"
+log_file="logs/TowerNNConv_spatial_target_0_base_settings_run1.$SLURM_JOB_ID"
 # Execute the command and redirect output to log file
 echo "Executing: $CMD > $log_file"
 eval $CMD > $log_file

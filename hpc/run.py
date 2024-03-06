@@ -15,7 +15,7 @@ parser = argparse.ArgumentParser(description='Running MLMI4 experiments')
 parser.add_argument('--debugging', type=str2bool, default='False', help="If True uses 1000 samples")
 parser.add_argument('--spatial', type=str2bool, default='False', help="Use spatial info?")
 parser.add_argument('--batch_size', type=int, default=128)
-parser.add_argument('--num_layers', type=int, default=7, help="number of GNN layers")
+parser.add_argument('--num_layers', type=int, default=3, help="number of GNN layers")
 parser.add_argument('--hidden_channels', type=int, default=200, help="size of hidden node features")
 parser.add_argument('--nn_width_factor', type=int, default=2, help="in NNConv, the width of the nn=h_theta")
 parser.add_argument('--M', type=int, default=4, help="s2s processing steps")
@@ -37,7 +37,7 @@ if args.debugging:
     args.batch_size = 64
     args.num_epochs = 200
     args.patience = 50
-    args.num_layers = 1
+    args.num_layers = 3
     # args.hidden_channels = 200
     args.initial_lr = 1e-3
 
