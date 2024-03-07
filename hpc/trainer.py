@@ -44,8 +44,8 @@ def run_experiment(model, args):
     print(f'Total parameters: {total_param}')
     model = model.to(args.device)
 
-    args.optimizer = torch.optim.Adam(model.parameters(), lr=args.initial_lr,
-                                      weight_decay=1e-16)
+    args.optimizer = torch.optim.Adam(model.parameters(), lr=args.initial_lr)
+                                    #   weight_decay=1e-16)
 
     # cosine learning rate annealing
     # scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(args.optimizer, args.num_epochs,

@@ -62,7 +62,6 @@ class GNN(torch.nn.Module):
         else:
             self.out = Sequential(
                 Linear(pred_channels, hidden_channels), SiLU(),
-                Linear(hidden_channels, hidden_channels), SiLU(),
                 Linear(hidden_channels, output_channels)
                 )
 
@@ -96,9 +95,9 @@ class GNN(torch.nn.Module):
         return x.squeeze(-1)
 
 
-class TowerNNConv(torch.nn.Module):
+class TowerGNN(torch.nn.Module):
     """
-    Tower Neural Network Convolution (TowerNNConv) model. For NNConv and EGNN with large hidden
+    Tower GNN model. For NNConv and EGNN with large hidden
     channel size.
 
     Args:
@@ -155,7 +154,6 @@ class TowerNNConv(torch.nn.Module):
         
         self.out = Sequential(
             Linear(pred_channels, hidden_channels), SiLU(),
-            Linear(hidden_channels, hidden_channels), SiLU(),
             Linear(hidden_channels, output_channels)
             )
     
@@ -277,7 +275,6 @@ class EGNN(torch.nn.Module):
 #           self.aggr = Set2Set(in_channels=hidden_channels, processing_steps=M)
 #           self.out = Sequential(
 #               Linear(2*hidden_channels, hidden_channels), SiLU(),
-#               Linear(hidden_channels, hidden_channels), SiLU(),
 #               Linear(hidden_channels, output_channels)
 #             )
 #         else:
