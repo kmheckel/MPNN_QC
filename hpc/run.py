@@ -31,15 +31,16 @@ parser.add_argument('--predict_all', type=str2bool, default='False', help="Predi
 parser.add_argument('--use_branching', type=str2bool, default='False', help="Branch after GNN layers to predict all targets")
 parser.add_argument('--model_name', type=str, default='NNConv', help="GGNN/NNConv/GAT/EGNN")
 parser.add_argument('--num_towers', type=int, default=8, help="Number of towers in the model, 0 for no towers")
+parser.add_argument('--pre_trained_path', type=str, default='', help="Path to existing model")
 args = parser.parse_args()
 
 if args.debugging:
     print("Running in debugging mode.")
     args.batch_size = 64
-    args.num_epochs = 100
-    args.patience = 50
-    args.num_layers = 3
-    args.hidden_channels = 32
+    args.num_epochs = 3
+    args.patience = 5
+    args.num_layers = 1
+    args.hidden_channels = 8
     args.initial_lr = 1e-3
 
 if 'egnn' in args.model_name.lower():
@@ -53,6 +54,8 @@ if args.predict_all:
     args.target = [0, 1, 2, 3, 4, 5, 6, 11, 12, 13, 14, 15]
 
 args.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print('\n')
+print(f'PREDICTING TARGET {args.target}', '\n')
 print(args, '\n')
 
 class MyTransform:
@@ -91,6 +94,12 @@ else:
                             nn_width_factor=args.nn_width_factor,
                             model_name=args.model_name, 
                             output_channels=args.output_channels, args=args)
+if args.pre_trained_path:
+    try:
+        model.load_state_dict(torch.load(args.pre_trained_path))
+        print(f"Loaded pre-trained model from {args.pre_trained_path}")
+    except:
+        print(f"Could not load pre-trained model from {args.pre_trained_path}, make sure to initialise the model with the same architecture!")
 
 args.model_name = type(model).__name__
 # if torch.__version__ == "2.1.0":

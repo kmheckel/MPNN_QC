@@ -61,7 +61,6 @@ module load rhel8/default-amp              # REQUIRED - loads the basic environm
 
 source /home/${USER}/.bashrc
 conda activate QChemGPU
-# source /home/zt264/.conda/envs/QChemGPU/bin/activate
 #! Insert additional module load commands after this line if needed:
 
 #! Full path to application executable: 
