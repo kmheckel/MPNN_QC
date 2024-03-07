@@ -37,12 +37,12 @@ class GNN(torch.nn.Module):
                                             hidden_channels * hidden_channels))
 
         if 'nnconv' in model_name.lower():
-            self.conv = NNConv(hidden_channels, hidden_channels, self.nn)
+            self.conv = NNConv(hidden_channels, hidden_channels, self.nn, aggr='mean')
         elif 'gat' in model_name.lower():
             self.conv = GATv2Conv(hidden_channels, hidden_channels, heads=1,
                                         edge_dim=edge_feat_dim)
         elif 'ggnn' in model_name.lower():
-            self.conv = GatedGraphConv(hidden_channels, hidden_channels)
+            self.conv = GatedGraphConv(hidden_channels, hidden_channels, aggr='mean')
         else:
             raise ValueError(f"Model {model_name} not recognized.")
         
@@ -136,11 +136,11 @@ class TowerGNN(torch.nn.Module):
         # Towers for each convolution layer
         if self.nnconv:
             self.towers = torch.nn.ModuleList([
-                NNConv(self.tower_dim, self.tower_dim, self.nns[i]) for i in range(num_towers)
+                NNConv(self.tower_dim, self.tower_dim, self.nns[i], aggr='mean') for i in range(num_towers)
             ])
         elif 'ggnn' in model_name.lower():
             self.towers = torch.nn.ModuleList([
-                GatedGraphConv(self.tower_dim, self.tower_dim) for _ in range(num_towers)
+                GatedGraphConv(self.tower_dim, self.tower_dim, aggr='mean') for _ in range(num_towers)
             ])
         else:
             raise ValueError(f"Model {model_name} not recognized.")

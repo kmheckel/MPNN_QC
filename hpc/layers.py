@@ -22,7 +22,7 @@ class EGNNLayer(MessagePassing):
 
     """
 
-    def __init__(self, in_channels, hidden_channels, edge_dim=4, aggr='sum'):
+    def __init__(self, in_channels, hidden_channels, edge_dim=4, aggr='mean'):
         super().__init__(aggr=aggr)
 
         self.in_channels = in_channels

@@ -36,10 +36,10 @@ args = parser.parse_args()
 if args.debugging:
     print("Running in debugging mode.")
     args.batch_size = 64
-    args.num_epochs = 20
+    args.num_epochs = 100
     args.patience = 50
     args.num_layers = 3
-    args.hidden_channels = 64
+    args.hidden_channels = 32
     args.initial_lr = 1e-3
 
 if 'egnn' in args.model_name.lower():
@@ -52,6 +52,7 @@ else:
 if args.predict_all:
     args.target = [0, 1, 2, 3, 4, 5, 6, 11, 12, 13, 14, 15]
 
+args.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(args, '\n')
 
 class MyTransform:

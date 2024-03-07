@@ -43,8 +43,8 @@ def get_data(args, loc_transform):
     mean = dataset.data.y.mean(dim=0, keepdim=True)
     std = dataset.data.y.std(dim=0, keepdim=True)
     dataset.data.y = (dataset.data.y - mean) / std
-    args.std = std[:, args.target]#.item()
-    args.mean = mean[:, args.target]#.item()
+    args.std = std[:, args.target].to(args.device)
+    args.mean = mean[:, args.target].to(args.device)
     
     if not args.debugging:
         test_dataset = dataset[:10000]
