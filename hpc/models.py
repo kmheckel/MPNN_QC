@@ -173,24 +173,25 @@ class TowerGNN(torch.nn.Module):
         # Process each tower separately
         updated_towers = []
         for i, tower in enumerate(self.towers):
-            h = towers_embeddings[i].unsqueeze(0).contiguous()  # Ensure h is contiguous
+            tower_output = towers_embeddings[i]
+            h = tower_output.unsqueeze(0).contiguous()  # Ensure h is contiguous
             for _ in range(self.num_layers):
                 if self.nnconv:
-                    tower_output = self.nl(tower(towers_embeddings[i], data.edge_index, edge_attr=data.edge_attr))
+                    tower_output = self.nl(tower(tower_output, data.edge_index, edge_attr=data.edge_attr))
                 else:
-                    tower_output = self.nl(tower(towers_embeddings[i], data.edge_index))
+                    tower_output = self.nl(tower(tower_output, data.edge_index))
                 tower_output, h = self.grus[i](tower_output.unsqueeze(0), h.contiguous())
                 tower_output = tower_output.squeeze(0)
             updated_towers.append(tower_output)
         
         # Concatenate and mix the outputs from the towers
-        mixed_embeddings = torch.cat(updated_towers, dim=1)
-        mixed_embeddings = self.mixing_network(mixed_embeddings)
+        updated_towers = torch.cat(updated_towers, dim=1)
+        updated_towers = self.mixing_network(updated_towers)
         
         # Aggregate and output
-        x = self.aggr(mixed_embeddings, data.batch)
-        x = self.out(x)
-        return x.squeeze(-1)
+        updated_towers = self.aggr(updated_towers, data.batch)
+        updated_towers = self.out(updated_towers)
+        return updated_towers.squeeze(-1)
 
 
 class EGNN(torch.nn.Module):
