@@ -35,10 +35,9 @@ class Complete:
 def get_data(args, loc_transform):
     if args.spatial:
         transform = T.Compose([loc_transform, Complete(), T.Distance(norm=False)])
-        path = osp.join(osp.dirname(osp.realpath(__file__)), '..', 'data', 'QM9_spatial')
     else:
         transform = T.Compose([loc_transform, Complete()])
-        path = osp.join(osp.dirname(osp.realpath(__file__)), '..', 'data', 'QM9_nonspatial')
+    path = osp.join(osp.dirname(osp.realpath(__file__)), '..', 'data', 'QM9')
     dataset = QM9(path, transform=transform).shuffle()
     mean = dataset.data.y.mean(dim=0, keepdim=True)
     std = dataset.data.y.std(dim=0, keepdim=True)
