@@ -22,7 +22,7 @@
 #! Note that the job submission script will enforce no more than 32 cpus per GPU.
 #SBATCH --gres=gpu:1
 #! How much wallclock time will be required?
-#SBATCH --time=02:00:00
+#SBATCH --time=03:16:00
 #! What types of email messages do you wish to receive?
 #SBATCH --mail-type=NONE
 #! Uncomment this to prevent the job from being requeued (e.g. if
@@ -109,11 +109,11 @@ mkdir -p logs
 
 
 # Build the options string
-options="--spatial=True --target=0"
+options="--target=3"
 # Command to run
 CMD="python -u run.py $options"
 # Log file for this iteration
-log_file="logs/TowerNNConv_spatial_target_0_base_settings_run1.$SLURM_JOB_ID"
+log_file="logs/TowerNNConv_spatial_target_3_base_settings_run1.$SLURM_JOB_ID"
 # Execute the command and redirect output to log file
 echo "Executing: $CMD > $log_file"
 eval $CMD > $log_file

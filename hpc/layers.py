@@ -1,5 +1,5 @@
 import torch
-from torch.nn import Sequential, Linear, SiLU
+from torch.nn import Sequential, Linear, SiLU, BatchNorm1d
 from torch_geometric.nn import MessagePassing
 from torch_scatter import scatter
 
@@ -30,12 +30,12 @@ class EGNNLayer(MessagePassing):
         self.aggregation = aggr
 
         self.mlp_msg = Sequential(
-            Linear(2*hidden_channels + edge_dim + 1, hidden_channels), SiLU(),
-            Linear(hidden_channels, hidden_channels), SiLU()
+            Linear(2*hidden_channels + edge_dim + 1, hidden_channels), BatchNorm1d(hidden_channels), SiLU(),
+            Linear(hidden_channels, hidden_channels), BatchNorm1d(hidden_channels), SiLU()
         )
 
         self.mlp_upd = Sequential(
-            Linear(2*hidden_channels, hidden_channels), SiLU(),
+            Linear(2*hidden_channels, hidden_channels), BatchNorm1d(hidden_channels), SiLU(),
             Linear(hidden_channels, hidden_channels),
         )
 
@@ -110,40 +110,3 @@ class EGNNLayer(MessagePassing):
         aggr_msg = inputs
         upd_out = torch.cat([x, aggr_msg], dim=-1)
         return x + self.mlp_upd(upd_out)
-
-
-
-########### OLD CODE ###########
-# class PositionalNNConvLayer(MessagePassing):
-#     def __init__(self, in_channels, hidden_channels, nn, aggr='sum'):
-#         super().__init__(aggr=aggr)
-
-#         self.in_channels = in_channels
-#         self.out_channels = hidden_channels
-#         self.nn = nn
-#         self.aggregation = aggr
-
-#     def forward(self, x, pos, edge_index, edge_attr=None):
-#         out = self.propagate(edge_index, x=x, edge_attr=edge_attr, pos=pos)
-#         return out
-
-#     def message(self, x_j, pos, edge_index, edge_attr):
-#         # x_i, x_j are the features of the source and target nodes, respectively
-#         pos_i = pos[edge_index[1]]  # Target node positions
-#         pos_j = pos[edge_index[0]]  # Source node positions
-#         rel_pos = pos_i - pos_j  # Relative positions
-#         rel_pos_norm = (torch.norm(rel_pos, p=2, dim=-1)).unsqueeze(-1)
-#         weight = self.nn(torch.cat([edge_attr, rel_pos_norm], dim=-1))
-#         weight = weight.view(-1, self.in_channels, self.out_channels)
-#         # trying out things to omit hidden_size x hidden_size nn output size!
-#         # weight = torch.bmm(weight.unsqueeze(2), x_j.unsqueeze(1))
-#         msg = torch.matmul(x_j.unsqueeze(1), weight).squeeze(1)
-#         return msg
-
-#     def aggregate(self, inputs, index):
-#         return scatter(inputs, index, dim=self.node_dim, reduce=self.aggregation)
-
-#     # def update(self, inputs, x):
-#     #     aggr_msg = inputs
-#     #     upd_out = torch.cat([x, aggr_msg], dim=-1)
-#     #     return self.mlp_upd(upd_out)

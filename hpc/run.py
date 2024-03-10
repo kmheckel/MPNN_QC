@@ -12,7 +12,6 @@ def str2bool(v):
 parser = argparse.ArgumentParser(description='Running MLMI4 experiments')
 
 # set arguments for training and decoding. 
-# parser.add_argument('--seed', type=int, default=123)
 parser.add_argument('--debugging', type=str2bool, default='False', help="If True uses 1000 samples")
 parser.add_argument('--spatial', type=str2bool, default='True', help="Use spatial info?")
 parser.add_argument('--batch_size', type=int, default=128)
@@ -22,9 +21,8 @@ parser.add_argument('--nn_width_factor', type=int, default=2, help="in NNConv, t
 parser.add_argument('--M', type=int, default=3, help="s2s processing steps")
 parser.add_argument('--initial_lr', type=float, default=1e-3, help="learning rate")
 parser.add_argument('--report_interval', type=int, default=1, help="report interval during training")
-parser.add_argument('--num_epochs', type=int, default=200)
-parser.add_argument('--patience', type=int, default=30)
-# parser.add_argument('--scheduler', type=str2bool, default='True', help="learning rate scheduler")
+parser.add_argument('--num_epochs', type=int, default=120)
+parser.add_argument('--patience', type=int, default=14)
 parser.add_argument('--aggr', type=str, default='s2s', help="s2s/gru")
 parser.add_argument('--target', type=int, default=0, help="target node from 0-11")
 parser.add_argument('--predict_all', type=str2bool, default='False', help="Predict all targets?")
@@ -32,15 +30,17 @@ parser.add_argument('--use_branching', type=str2bool, default='False', help="Bra
 parser.add_argument('--model_name', type=str, default='NNConv', help="GGNN/NNConv/GAT/EGNN")
 parser.add_argument('--num_towers', type=int, default=8, help="Number of towers in the model, 0 for no towers")
 parser.add_argument('--pre_trained_path', type=str, default='', help="Path to existing model")
+parser.add_argument('--data_split', type=int, default=1000, help="Number of samples in the dataset when debugging")
 args = parser.parse_args()
 
+torch.cuda.empty_cache()
 if args.debugging:
     print("Running in debugging mode.")
     args.batch_size = 64
-    args.num_epochs = 3
+    args.num_epochs = 50
     args.patience = 5
-    args.num_layers = 1
-    args.hidden_channels = 8
+    args.num_layers = 3
+    args.hidden_channels = 32
     args.initial_lr = 1e-3
 
 if 'egnn' in args.model_name.lower():
@@ -66,7 +66,6 @@ class MyTransform:
 
 loc_transform = MyTransform()
 args.train_loader, args.val_loader, args.test_loader = get_data(args, loc_transform)
-# get output channels from train_loader
 args.output_channels = 1 if not args.predict_all else args.train_loader.dataset[0].y.shape[1]
 args.input_channels = args.train_loader.dataset[0].x.shape[1]
 args.edge_feat_dim = args.train_loader.dataset[0].edge_attr.shape[1]
@@ -102,7 +101,5 @@ if args.pre_trained_path:
         print(f"Could not load pre-trained model from {args.pre_trained_path}, make sure to initialise the model with the same architecture!")
 
 args.model_name = type(model).__name__
-# if torch.__version__ == "2.1.0":
-#     model = torch.compile(model)
+torch.compile(model, dynamic=True)
 run_experiment(model, args)
-

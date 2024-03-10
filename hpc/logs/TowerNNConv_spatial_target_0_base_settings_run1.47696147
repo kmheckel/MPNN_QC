@@ -120,3 +120,4 @@ Epoch: 075, LR: 0.0004900, Loss: 0.0035891, Val Error: 0.0830219, Test Error: 0.
 Epoch: 076, LR: 0.0004900, Loss: 0.0034737, Val Error: 0.0889658, Test Error: 0.0808047
 
 Best model saved to: scripts/models/2024-03-07_18-06/TowerGNN_3layers.pt
+Took 2hrs

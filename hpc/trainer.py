@@ -41,12 +41,13 @@ def run_experiment(model, args):
         total_param += np.prod(list(param.data.size()))
     print(f'Total parameters: {total_param}')
     model = model.to(args.device)
-    current_date = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-    model_save_path = f'models/{current_date}/{args.model_name}_'
-    results_save_path = f'results/{current_date}_{args.model_name}.pkl'
-    os.makedirs(os.path.dirname(results_save_path), exist_ok=True)
-    print(f"Training data being saved to: {results_save_path}")
-    print(f"Model being saved to: models/{current_date}/")
+    if not args.debugging:
+        current_date = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        model_save_path = f'models/{current_date}/{args.model_name}_'
+        results_save_path = f'results/{current_date}_{args.model_name}.pkl'
+        os.makedirs(os.path.dirname(results_save_path), exist_ok=True)
+        print(f"Training data being saved to: {results_save_path}")
+        print(f"Model being saved to: models/{current_date}/")
 
     args.optimizer = torch.optim.Adam(model.parameters(), lr=args.initial_lr)
                                     #   weight_decay=1e-16)
@@ -71,9 +72,10 @@ def run_experiment(model, args):
             best_val_error = val_error
             test_error = eval(model, args.test_loader, args)  # Evaluate model on test set if validation metric improves
             patience_counter = 0  # Reset patience counter
-            save_path = model_save_path+f'epoch_{epoch}.pt'
-            os.makedirs(os.path.dirname(save_path), exist_ok=True)
-            torch.save(model.state_dict(), save_path)
+            if not args.debugging:
+                save_path = model_save_path+f'epoch_{epoch}.pt'
+                os.makedirs(os.path.dirname(save_path), exist_ok=True)
+                torch.save(model.state_dict(), save_path)
         else:
             patience_counter += 1
 
@@ -82,7 +84,7 @@ def run_experiment(model, args):
 
         scheduler.step(val_error)
         perf_per_epoch.append((test_error, val_error, epoch, args.model_name))
-        if val_improvement:
+        if val_improvement and not args.debugging:
             with open(results_save_path, 'wb') as f:
                 pickle.dump((best_val_error, test_error, perf_per_epoch), f)
 
@@ -93,8 +95,9 @@ def run_experiment(model, args):
     t = time.time() - t
     train_time = t / 60
     print(f"\nDone! Training took {train_time:.2f} minutes. Best validation error: {best_val_error:.7f}, corresponding test error: {test_error:.7f}.")
-    print(f"Best model saved to: {save_path}")
-    with open(results_save_path, 'wb') as f:
-        pickle.dump((best_val_error, test_error, train_time, perf_per_epoch), f)
-    print(f"Training data saved to: {results_save_path}")
+    if not args.debugging:
+        print(f"Best model saved to: {save_path}")
+        with open(results_save_path, 'wb') as f:
+            pickle.dump((best_val_error, test_error, train_time, perf_per_epoch), f)
+        print(f"Training data saved to: {results_save_path}")
     return best_val_error, test_error, train_time, perf_per_epoch
