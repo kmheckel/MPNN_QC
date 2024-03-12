@@ -37,10 +37,10 @@ torch.cuda.empty_cache()
 if args.debugging:
     print("Running in debugging mode.")
     args.batch_size = 64
-    args.num_epochs = 50
+    args.num_epochs = 2
     args.patience = 5
-    args.num_layers = 3
-    args.hidden_channels = 32
+    args.num_layers = 1
+    args.hidden_channels = 8 #74
     args.initial_lr = 1e-3
 
 if 'egnn' in args.model_name.lower():
@@ -51,7 +51,7 @@ else:
     args.egnn = False
 
 if args.predict_all:
-    args.target = [0, 1, 2, 3, 4, 5, 6, 11, 12, 13, 14, 15]
+    args.target = [0, 1, 2, 3, 4, 5, 6, 12, 13, 14, 15, 11]
 
 args.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print('\n')
@@ -76,11 +76,11 @@ Edge feature dim: {args.edge_feat_dim}, Hidden channels: {args.hidden_channels}"
 if not args.num_towers:
     if not args.egnn:
         model = models.GNN(args.input_channels, args.hidden_channels,
-                                        num_layers=args.num_layers, M=args.M,
-                                        nn_width_factor=args.nn_width_factor,
-                                        edge_feat_dim=args.edge_feat_dim,
-                                        model_name=args.model_name, aggregation=args.aggr,
-                                        output_channels=args.output_channels, args=args)
+                           num_layers=args.num_layers, M=args.M,
+                           nn_width_factor=args.nn_width_factor,
+                           edge_feat_dim=args.edge_feat_dim,
+                           model_name=args.model_name,
+                           output_channels=args.output_channels, args=args)
     else:
         model = models.EGNN(args.input_channels, args.hidden_channels,
                             num_layers=args.num_layers,
@@ -91,7 +91,6 @@ else:
                             num_towers=args.num_towers,
                             edge_feat_dim=args.edge_feat_dim,
                             nn_width_factor=args.nn_width_factor,
-                            model_name=args.model_name, 
                             output_channels=args.output_channels, args=args)
 if args.pre_trained_path:
     try:

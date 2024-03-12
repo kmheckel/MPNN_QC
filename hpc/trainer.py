@@ -30,6 +30,16 @@ def eval(model, loader, args):
             error += (y_pred * args.std - data.y * args.std).abs().sum().item()
     return error / len(loader.dataset) / args.output_channels
 
+def eval_multi_pred(model, loader, args):
+    model.eval()
+    error = torch.zeros(args.output_channels)
+    for data in loader:
+        data = data.to(args.device)
+        with torch.no_grad():
+            y_pred = model(data)
+            error += (y_pred * args.std - data.y * args.std).abs().sum(axis=0)
+    return error / len(loader.dataset)
+
 def run_experiment(model, args):
     print(f"Running experiment for {args.model_name}, training on {len(args.train_loader.dataset)} samples for {args.num_epochs} epochs.")
     args.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -50,10 +60,6 @@ def run_experiment(model, args):
         print(f"Model being saved to: models/{current_date}/")
 
     args.optimizer = torch.optim.Adam(model.parameters(), lr=args.initial_lr)
-                                    #   weight_decay=1e-16)
-    # cosine learning rate annealing
-    # scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(args.optimizer, args.num_epochs,
-    #                                                        eta_min=args.initial_lr * 0.01)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(args.optimizer, mode='min',
                                                            factor=0.7, patience=5,
                                                            min_lr=0.00001)
@@ -91,6 +97,11 @@ def run_experiment(model, args):
         if patience_counter >= args.patience:
             print(f"Stopping early due to no improvement in validation error for {args.patience} epochs.")
             break
+
+    if args.predict_all and not args.debugging:
+        model.load_state_dict(torch.load(save_path))
+        multi_test_error = eval_multi_pred(model, args.test_loader, args)
+        print(f"Final test MAE per target for the best model: {multi_test_error.tolist()}")
 
     t = time.time() - t
     train_time = t / 60

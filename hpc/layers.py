@@ -1,5 +1,5 @@
 import torch
-from torch.nn import Sequential, Linear, SiLU, BatchNorm1d
+from torch.nn import Sequential, Linear, SiLU, BatchNorm1d, Sigmoid
 from torch_geometric.nn import MessagePassing
 from torch_scatter import scatter
 
@@ -33,11 +33,11 @@ class EGNNLayer(MessagePassing):
             Linear(2*hidden_channels + edge_dim + 1, hidden_channels), BatchNorm1d(hidden_channels), SiLU(),
             Linear(hidden_channels, hidden_channels), BatchNorm1d(hidden_channels), SiLU()
         )
-
         self.mlp_upd = Sequential(
             Linear(2*hidden_channels, hidden_channels), BatchNorm1d(hidden_channels), SiLU(),
             Linear(hidden_channels, hidden_channels),
         )
+        self.att_mlp = Sequential(Linear(hidden_channels, 1), Sigmoid())
 
     def forward(self, x, pos, edge_index, edge_attr=None):
         """
@@ -77,6 +77,7 @@ class EGNNLayer(MessagePassing):
         rel_pos_norm = (torch.norm(rel_pos, p=2, dim=-1) ** 2).unsqueeze(-1)
         msg = torch.cat([x_i, x_j, edge_attr, rel_pos_norm], dim=-1)
         msg = self.mlp_msg(msg)
+        msg = msg * self.att_mlp(msg)
         return msg
 
     def aggregate(self, inputs, index):

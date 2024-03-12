@@ -1,7 +1,7 @@
 import torch
 from torch.nn import Linear, Sequential, SiLU, GRU, BatchNorm1d
 from layers import EGNNLayer
-from torch_geometric.nn import NNConv, GRUAggregation, Set2Set, GATv2Conv, GatedGraphConv, global_add_pool
+from torch_geometric.nn import NNConv, Set2Set, GATv2Conv, GatedGraphConv, global_add_pool
 
 class GNN(torch.nn.Module):
     """
@@ -22,7 +22,7 @@ class GNN(torch.nn.Module):
 
     def __init__(self, input_channels, hidden_channels, output_channels=1,
                  num_layers=4, M=3, edge_feat_dim=4,
-                 nn_width_factor=2, aggregation='s2s', model_name='NNConv', args=None):
+                 nn_width_factor=2, model_name='NNConv', args=None):
         super().__init__()
         self.num_layers = num_layers
         self.first_layer = Linear(input_channels, hidden_channels)
@@ -42,18 +42,11 @@ class GNN(torch.nn.Module):
         elif 'gat' in model_name.lower():
             self.conv = GATv2Conv(hidden_channels, hidden_channels, heads=4, concat=False,
                                         edge_dim=edge_feat_dim)
-        elif 'ggnn' in model_name.lower():
-            self.conv = GatedGraphConv(hidden_channels, hidden_channels, aggr='mean')
         else:
             raise ValueError(f"Model {model_name} not recognized.")
         
-        self.edge_attr_exists = 'edge_attr' in self.conv.forward.__code__.co_varnames
-        if aggregation == 's2s':
-          self.aggr = Set2Set(in_channels=hidden_channels, processing_steps=M)
-          pred_channels = 2 * hidden_channels
-        else:
-            self.aggr = GRUAggregation(in_channels=hidden_channels, out_channels=hidden_channels)
-            pred_channels = hidden_channels
+        self.aggr = Set2Set(in_channels=hidden_channels, processing_steps=M)
+        pred_channels = 2 * hidden_channels
 
         if args.use_branching and args.predict_all:
             self.out_nets = torch.nn.ModuleList([Sequential(
@@ -78,16 +71,10 @@ class GNN(torch.nn.Module):
         """
         x = self.nl(self.first_layer(data.x))
         h = x.unsqueeze(0).contiguous()  # Add singleton dimension for edge features
-        # for conv in self.convs:
         for _ in range(self.num_layers):
-            if self.edge_attr_exists:
-                m = self.nl(self.conv(x, data.edge_index, edge_attr=data.edge_attr))
-                x, h = self.gru(m.unsqueeze(0), h.contiguous())
-                x = x.squeeze(0)
-            else:
-                x = self.nl(self.conv(x, data.edge_index))
-                x, h = self.gru(x.unsqueeze(0), h.contiguous())
-                x = x.squeeze(0)
+            m = self.nl(self.conv(x, data.edge_index, edge_attr=data.edge_attr))
+            x, h = self.gru(m.unsqueeze(0), h.contiguous())
+            x = x.squeeze(0)
         x = self.aggr(x, data.batch)
         if not self.args.predict_all or not self.args.use_branching:
             x = self.out(x)
@@ -116,13 +103,12 @@ class TowerGNN(torch.nn.Module):
 
     def __init__(self, input_channels=11, hidden_channels=200, num_towers=8, output_channels=1,
                  num_layers=4, M=3, edge_feat_dim=4,
-                 nn_width_factor=2, model_name='nnconv', args=None):
+                 nn_width_factor=2, args=None):
         super().__init__()
         self.num_layers = num_layers
         self.num_towers = num_towers
         self.tower_dim = hidden_channels // num_towers
         self.args = args
-        self.nnconv = 'nnconv' in model_name.lower()
         
         # Initial transformation
         self.first_layer = Linear(input_channels, hidden_channels)
@@ -130,21 +116,13 @@ class TowerGNN(torch.nn.Module):
         self.nl = SiLU()
         
         # Edge MLP for NNConv
-        if self.nnconv:
-            self.nns = torch.nn.ModuleList([Sequential(Linear(edge_feat_dim, self.tower_dim * nn_width_factor), BatchNorm1d(self.tower_dim * nn_width_factor),
-                                SiLU(), Linear(self.tower_dim * nn_width_factor, self.tower_dim ** 2)) for _ in range(num_towers)])
+        self.nns = torch.nn.ModuleList([Sequential(Linear(edge_feat_dim, self.tower_dim * nn_width_factor), BatchNorm1d(self.tower_dim * nn_width_factor),
+                            SiLU(), Linear(self.tower_dim * nn_width_factor, self.tower_dim ** 2)) for _ in range(num_towers)])
 
         # Towers for each convolution layer
-        if self.nnconv:
-            self.towers = torch.nn.ModuleList([
-                NNConv(self.tower_dim, self.tower_dim, self.nns[i], aggr='mean') for i in range(num_towers)
-            ])
-        elif 'ggnn' in model_name.lower():
-            self.towers = torch.nn.ModuleList([
-                GatedGraphConv(self.tower_dim, self.tower_dim, aggr='mean') for _ in range(num_towers)
-            ])
-        else:
-            raise ValueError(f"Model {model_name} not recognized.")
+        self.towers = torch.nn.ModuleList([
+            NNConv(self.tower_dim, self.tower_dim, self.nns[i], aggr='mean') for i in range(num_towers)
+        ])
         # Shared mixing network
         self.mixing_network = Sequential(
             Linear(hidden_channels, hidden_channels), BatchNorm1d(hidden_channels), SiLU(),
@@ -177,10 +155,7 @@ class TowerGNN(torch.nn.Module):
             tower_output = towers_embeddings[i]
             h = tower_output.unsqueeze(0).contiguous()  # Ensure h is contiguous
             for _ in range(self.num_layers):
-                if self.nnconv:
-                    tower_output = self.nl(tower(tower_output, data.edge_index, edge_attr=data.edge_attr))
-                else:
-                    tower_output = self.nl(tower(tower_output, data.edge_index))
+                tower_output = self.nl(tower(tower_output, data.edge_index, edge_attr=data.edge_attr))
                 tower_output, h = self.grus[i](tower_output.unsqueeze(0), h.contiguous())
                 tower_output = tower_output.squeeze(0)
             updated_towers.append(tower_output)

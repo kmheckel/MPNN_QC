@@ -22,7 +22,7 @@
 #! Note that the job submission script will enforce no more than 32 cpus per GPU.
 #SBATCH --gres=gpu:1
 #! How much wallclock time will be required?
-#SBATCH --time=03:16:00
+#SBATCH --time=03:00:00
 #! What types of email messages do you wish to receive?
 #SBATCH --mail-type=NONE
 #! Uncomment this to prevent the job from being requeued (e.g. if
@@ -92,28 +92,42 @@ cd $workdir
 echo -e "Changed directory to `pwd`.\n"
 mkdir -p logs
 
-# IN CASE YOU WANT TO LOOP OVER HYPERPARAMS:
-# lrs=(0.01 0.1 1)
-# # Loop over configurations
-# for lr in "${lrs[@]}"; do
-#     # Build the options string
-#     options="--dropout=0.2 --clip=2 --lr=${lr}"
-#     # Command to run
-#     CMD="python -u run.py $options"
-#     # Log file for this iteration
-#     log_file="logs/sgd_${lr}.$SLURM_JOB_ID"
-#     # Execute the command and redirect output to log file
-#     echo "Executing: $CMD > $log_file"
-#     eval $CMD > $log_file
-# done
+# # GAT
+# options="--model_name=gat --num_towers=0 --hidden_channels=180 --predict_all=True"
+# # Command to run
+# CMD="python -u run.py $options"
+# # Log file for this iteration
+# log_file="logs/GAT_spatial_alltargets_run1_batchnorm.$SLURM_JOB_ID"
+# # Execute the command and redirect output to log file
+# echo "Executing: $CMD > $log_file"
+# eval $CMD > $log_file
 
+# # NNConv
+# options="--model_name=nnconv --num_towers=0 --hidden_channels=74 --predict_all=True"
+# # Command to run
+# CMD="python -u run.py $options"
+# # Log file for this iteration
+# log_file="logs/NNConv_spatial_alltargets_run1_batchnorm.$SLURM_JOB_ID"
+# # Execute the command and redirect output to log file
+# echo "Executing: $CMD > $log_file"
+# eval $CMD > $log_file
 
-# Build the options string
-options="--target=3"
+# # TowerNNConv
+# options="--model_name=nnconv --num_towers=8 --hidden_channels=200 --predict_all=True"
+# # Command to run
+# CMD="python -u run.py $options"
+# # Log file for this iteration
+# log_file="logs/TowerNNConv_spatial_alltargets_run1_batchnorm.$SLURM_JOB_ID"
+# # Execute the command and redirect output to log file
+# echo "Executing: $CMD > $log_file"
+# eval $CMD > $log_file
+
+# EGNN
+options="--model_name=egnn --num_towers=0 --hidden_channels=128 --target=3 --num_layers=7"
 # Command to run
 CMD="python -u run.py $options"
 # Log file for this iteration
-log_file="logs/TowerNNConv_spatial_target_3_base_settings_run1.$SLURM_JOB_ID"
+log_file="logs/EGNN_spatial_target_3_run1_batchnorm.$SLURM_JOB_ID"
 # Execute the command and redirect output to log file
 echo "Executing: $CMD > $log_file"
 eval $CMD > $log_file

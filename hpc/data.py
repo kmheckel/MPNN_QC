@@ -33,17 +33,15 @@ class Complete:
         return data
 
 def get_data(args, loc_transform):
+    ggnn = 'ggnn' in args.model_name
     if args.spatial:
         transform = T.Compose([loc_transform, Complete(), T.Distance(norm=False)])
     else:
         transform = T.Compose([loc_transform, Complete()])
     path = osp.join(osp.dirname(osp.realpath(__file__)), '..', 'data', 'QM9')
     dataset = QM9(path, transform=transform).shuffle()
-    # print(dataset.data.y[20000:].mean(dim=0, keepdim=True),'\n', dataset.data.y[20000:].std(dim=0, keepdim=True),'\n')
     mean = dataset.data.y[20000:].mean(dim=0, keepdim=True)
     std = dataset.data.y[20000:].std(dim=0, keepdim=True)
-    # print(mean, '\n',std)
-    # raise
     dataset.data.y = (dataset.data.y - mean) / std
     args.std = std[:, args.target].to(args.device)
     args.mean = mean[:, args.target].to(args.device)
