@@ -1,0 +1,128 @@
+
+
+PREDICTING TARGET 1 
+
+Namespace(debugging=False, spatial=True, batch_size=128, num_layers=3, hidden_channels=200, nn_width_factor=2, M=3, initial_lr=0.001, report_interval=1, num_epochs=120, patience=14, aggr='s2s', target=1, predict_all=False, use_branching=False, model_name='NNConv', num_towers=8, pre_trained_path='', data_split=1000, egnn=False, device=device(type='cuda')) 
+
+Created dataset splits with 110831 training, 10000 validation, 10000 test samples.
+Input channels: 11, Output channels: 1, 
+Edge feature dim: 5, Hidden channels: 200
+Running experiment for TowerGNN, training on 110831 samples for 120 epochs.
+Training on cuda.
+
+Model architecture:
+TowerGNN(
+  (first_layer): Linear(in_features=11, out_features=200, bias=True)
+  (grus): ModuleList(
+    (0-7): 8 x GRU(25, 25)
+  )
+  (nl): SiLU()
+  (nns): ModuleList(
+    (0-7): 8 x Sequential(
+      (0): Linear(in_features=5, out_features=50, bias=True)
+      (1): BatchNorm1d(50, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): SiLU()
+      (3): Linear(in_features=50, out_features=625, bias=True)
+    )
+  )
+  (towers): ModuleList(
+    (0-7): 8 x NNConv(25, 25, aggr=mean, nn=Sequential(
+      (0): Linear(in_features=5, out_features=50, bias=True)
+      (1): BatchNorm1d(50, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): SiLU()
+      (3): Linear(in_features=50, out_features=625, bias=True)
+    ))
+  )
+  (mixing_network): Sequential(
+    (0): Linear(in_features=200, out_features=200, bias=True)
+    (1): BatchNorm1d(200, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): SiLU()
+    (3): Linear(in_features=200, out_features=200, bias=True)
+  )
+  (aggr): Set2Set(200, 400)
+  (out): Sequential(
+    (0): Linear(in_features=400, out_features=200, bias=True)
+    (1): BatchNorm1d(200, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): SiLU()
+    (3): Linear(in_features=200, out_features=1, bias=True)
+  )
+)
+Total parameters: 940201
+Training data being saved to: results/2024-03-12_03-10-51_TowerGNN.pkl
+Model being saved to: models/2024-03-12_03-10-51/
+
+Start training:
+Epoch: 001, LR: 0.0010000, Loss: 0.0773317, Val Error: 0.8571178, Test Error: 0.8421395
+Epoch: 002, LR: 0.0010000, Loss: 0.0457265, Val Error: 1.2181286, Test Error: 0.8421395
+Epoch: 003, LR: 0.0010000, Loss: 0.0410592, Val Error: 1.1793710, Test Error: 0.8421395
+Epoch: 004, LR: 0.0010000, Loss: 0.0368194, Val Error: 0.9838304, Test Error: 0.8421395
+Epoch: 005, LR: 0.0010000, Loss: 0.0362906, Val Error: 0.6778126, Test Error: 0.6744844
+Epoch: 006, LR: 0.0010000, Loss: 0.0349023, Val Error: 0.7407991, Test Error: 0.6744844
+Epoch: 007, LR: 0.0010000, Loss: 0.0341504, Val Error: 1.2294719, Test Error: 0.6744844
+Epoch: 008, LR: 0.0010000, Loss: 0.0310418, Val Error: 0.9155396, Test Error: 0.6744844
+Epoch: 009, LR: 0.0010000, Loss: 0.0306134, Val Error: 0.8919622, Test Error: 0.6744844
+Epoch: 010, LR: 0.0010000, Loss: 0.0290068, Val Error: 0.7521201, Test Error: 0.6744844
+Epoch: 011, LR: 0.0010000, Loss: 0.0283664, Val Error: 0.4770312, Test Error: 0.4734905
+Epoch: 012, LR: 0.0010000, Loss: 0.0292180, Val Error: 0.7024113, Test Error: 0.4734905
+Epoch: 013, LR: 0.0010000, Loss: 0.0251788, Val Error: 0.6683930, Test Error: 0.4734905
+Epoch: 014, LR: 0.0010000, Loss: 0.0238714, Val Error: 1.5358640, Test Error: 0.4734905
+Epoch: 015, LR: 0.0010000, Loss: 0.0247406, Val Error: 0.4641711, Test Error: 0.4648529
+Epoch: 016, LR: 0.0010000, Loss: 0.0250144, Val Error: 0.6495054, Test Error: 0.4648529
+Epoch: 017, LR: 0.0010000, Loss: 0.0270703, Val Error: 1.0649651, Test Error: 0.4648529
+Epoch: 018, LR: 0.0010000, Loss: 0.0242666, Val Error: 0.6317597, Test Error: 0.4648529
+Epoch: 019, LR: 0.0010000, Loss: 0.0235604, Val Error: 0.6611732, Test Error: 0.4648529
+Epoch: 020, LR: 0.0010000, Loss: 0.0236457, Val Error: 0.4369823, Test Error: 0.4404829
+Epoch: 021, LR: 0.0010000, Loss: 0.0234026, Val Error: 0.5732665, Test Error: 0.4404829
+Epoch: 022, LR: 0.0010000, Loss: 0.0211874, Val Error: 0.6133097, Test Error: 0.4404829
+Epoch: 023, LR: 0.0010000, Loss: 0.0216442, Val Error: 0.5519961, Test Error: 0.4404829
+Epoch: 024, LR: 0.0010000, Loss: 0.0217190, Val Error: 0.6971168, Test Error: 0.4404829
+Epoch: 025, LR: 0.0010000, Loss: 0.0198454, Val Error: 0.6403623, Test Error: 0.4404829
+Epoch: 026, LR: 0.0010000, Loss: 0.0183296, Val Error: 1.0169173, Test Error: 0.4404829
+Epoch: 027, LR: 0.0007000, Loss: 0.0184352, Val Error: 0.5310522, Test Error: 0.4404829
+Epoch: 028, LR: 0.0007000, Loss: 0.0187227, Val Error: 0.4060810, Test Error: 0.4036420
+Epoch: 029, LR: 0.0007000, Loss: 0.0160097, Val Error: 0.4152524, Test Error: 0.4036420
+Epoch: 030, LR: 0.0007000, Loss: 0.0164838, Val Error: 1.3511706, Test Error: 0.4036420
+Epoch: 031, LR: 0.0007000, Loss: 0.0162272, Val Error: 0.4957659, Test Error: 0.4036420
+Epoch: 032, LR: 0.0007000, Loss: 0.0167558, Val Error: 1.1865495, Test Error: 0.4036420
+Epoch: 033, LR: 0.0007000, Loss: 0.0179430, Val Error: 0.4617928, Test Error: 0.4036420
+Epoch: 034, LR: 0.0007000, Loss: 0.0137327, Val Error: 0.4492260, Test Error: 0.4036420
+Epoch: 035, LR: 0.0004900, Loss: 0.0148217, Val Error: 0.5271384, Test Error: 0.4036420
+Epoch: 036, LR: 0.0004900, Loss: 0.0166092, Val Error: 0.3310103, Test Error: 0.3354088
+Epoch: 037, LR: 0.0004900, Loss: 0.0145642, Val Error: 0.3874372, Test Error: 0.3354088
+Epoch: 038, LR: 0.0004900, Loss: 0.0142798, Val Error: 0.3673230, Test Error: 0.3354088
+Epoch: 039, LR: 0.0004900, Loss: 0.0147498, Val Error: 1.5518920, Test Error: 0.3354088
+Epoch: 040, LR: 0.0004900, Loss: 0.0145314, Val Error: 0.3297026, Test Error: 0.3361037
+Epoch: 041, LR: 0.0004900, Loss: 0.0133127, Val Error: 1.0573338, Test Error: 0.3361037
+Epoch: 042, LR: 0.0004900, Loss: 0.0135721, Val Error: 0.3094929, Test Error: 0.3057806
+Epoch: 043, LR: 0.0004900, Loss: 0.0136126, Val Error: 0.5516631, Test Error: 0.3057806
+Epoch: 044, LR: 0.0004900, Loss: 0.0149813, Val Error: 0.4998772, Test Error: 0.3057806
+Epoch: 045, LR: 0.0004900, Loss: 0.0137247, Val Error: 0.4235681, Test Error: 0.3057806
+Epoch: 046, LR: 0.0004900, Loss: 0.0137645, Val Error: 0.2623962, Test Error: 0.2655671
+Epoch: 047, LR: 0.0004900, Loss: 0.0134241, Val Error: 0.2962812, Test Error: 0.2655671
+Epoch: 048, LR: 0.0004900, Loss: 0.0125446, Val Error: 0.4071074, Test Error: 0.2655671
+Epoch: 049, LR: 0.0004900, Loss: 0.0133720, Val Error: 0.4417047, Test Error: 0.2655671
+Epoch: 050, LR: 0.0004900, Loss: 0.0130431, Val Error: 0.4307111, Test Error: 0.2655671
+Epoch: 051, LR: 0.0004900, Loss: 0.0132864, Val Error: 0.3162444, Test Error: 0.2655671
+Epoch: 052, LR: 0.0004900, Loss: 0.0118161, Val Error: 0.9125768, Test Error: 0.2655671
+Epoch: 053, LR: 0.0003430, Loss: 0.0120258, Val Error: 0.2822966, Test Error: 0.2655671
+Epoch: 054, LR: 0.0003430, Loss: 0.0128966, Val Error: 0.3057400, Test Error: 0.2655671
+Epoch: 055, LR: 0.0003430, Loss: 0.0123322, Val Error: 0.2499589, Test Error: 0.2525377
+Epoch: 056, LR: 0.0003430, Loss: 0.0119308, Val Error: 0.4861538, Test Error: 0.2525377
+Epoch: 057, LR: 0.0003430, Loss: 0.0125112, Val Error: 0.2637779, Test Error: 0.2525377
+Epoch: 058, LR: 0.0003430, Loss: 0.0164351, Val Error: 0.3391927, Test Error: 0.2525377
+Epoch: 059, LR: 0.0003430, Loss: 0.0119650, Val Error: 0.3515191, Test Error: 0.2525377
+Epoch: 060, LR: 0.0003430, Loss: 0.0114271, Val Error: 0.2679695, Test Error: 0.2525377
+Epoch: 061, LR: 0.0003430, Loss: 0.0112596, Val Error: 0.4435924, Test Error: 0.2525377
+Epoch: 062, LR: 0.0002401, Loss: 0.0104277, Val Error: 0.9189558, Test Error: 0.2525377
+Epoch: 063, LR: 0.0002401, Loss: 0.0111254, Val Error: 0.3558746, Test Error: 0.2525377
+Epoch: 064, LR: 0.0002401, Loss: 0.0116162, Val Error: 0.2725755, Test Error: 0.2525377
+Epoch: 065, LR: 0.0002401, Loss: 0.0112779, Val Error: 0.2954619, Test Error: 0.2525377
+Epoch: 066, LR: 0.0002401, Loss: 0.0108664, Val Error: 0.2941284, Test Error: 0.2525377
+Epoch: 067, LR: 0.0002401, Loss: 0.0108191, Val Error: 0.6960396, Test Error: 0.2525377
+Epoch: 068, LR: 0.0001681, Loss: 0.0108603, Val Error: 0.3383462, Test Error: 0.2525377
+Epoch: 069, LR: 0.0001681, Loss: 0.0105969, Val Error: 0.2906385, Test Error: 0.2525377
+Stopping early due to no improvement in validation error for 14 epochs.
+
+Done! Training took 69.93 minutes. Best validation error: 0.2499589, corresponding test error: 0.2525377.
+Best model saved to: models/2024-03-12_03-10-51/TowerGNN_epoch_55.pt
+Training data saved to: results/2024-03-12_03-10-51_TowerGNN.pkl
