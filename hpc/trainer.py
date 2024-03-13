@@ -32,7 +32,7 @@ def eval(model, loader, args):
 
 def eval_multi_pred(model, loader, args):
     model.eval()
-    error = torch.zeros(args.output_channels)
+    error = torch.zeros(args.output_channels).to(args.device)
     for data in loader:
         data = data.to(args.device)
         with torch.no_grad():

@@ -1,7 +1,7 @@
 import torch
 import models
 import argparse
-from trainer import run_experiment
+from trainer import run_experiment, eval_multi_pred
 from distutils.util import strtobool
 from data import get_data
 import copy
@@ -36,11 +36,11 @@ args = parser.parse_args()
 torch.cuda.empty_cache()
 if args.debugging:
     print("Running in debugging mode.")
-    args.batch_size = 64
+    args.batch_size = 128
     args.num_epochs = 2
     args.patience = 5
     args.num_layers = 1
-    args.hidden_channels = 8 #74
+    args.hidden_channels = 16 #74
     args.initial_lr = 1e-3
 
 if 'egnn' in args.model_name.lower():
@@ -85,6 +85,7 @@ if not args.num_towers:
         model = models.EGNN(args.input_channels, args.hidden_channels,
                             num_layers=args.num_layers,
                             output_channels=args.output_channels)
+        print(model)
 else:
     model = models.TowerGNN(args.input_channels, args.hidden_channels,
                             num_layers=args.num_layers, M=args.M,
@@ -94,11 +95,11 @@ else:
                             output_channels=args.output_channels, args=args)
 if args.pre_trained_path:
     try:
-        model.load_state_dict(torch.load(args.pre_trained_path))
+        model.load_state_dict(torch.load(args.pre_trained_path,
+                                         map_location=torch.device(args.device)))
         print(f"Loaded pre-trained model from {args.pre_trained_path}")
     except:
         print(f"Could not load pre-trained model from {args.pre_trained_path}, make sure to initialise the model with the same architecture!")
-
 args.model_name = type(model).__name__
 torch.compile(model, dynamic=True)
 run_experiment(model, args)
