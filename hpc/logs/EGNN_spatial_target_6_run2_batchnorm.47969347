@@ -1,0 +1,86 @@
+
+
+PREDICTING TARGET 6 
+
+Namespace(debugging=False, spatial=False, batch_size=128, num_layers=7, hidden_channels=128, nn_width_factor=2, M=3, initial_lr=0.0001, report_interval=1, num_epochs=54, patience=21, aggr='s2s', target=6, predict_all=False, use_branching=False, model_name='egnn', num_towers=0, pre_trained_path='models/2024-03-13_19-24-01/EGNN_epoch_52.pt', data_split=1000, egnn=True, device=device(type='cuda')) 
+
+Created dataset splits with 110831 training, 10000 validation, 10000 test samples.
+Input channels: 11, Output channels: 1, 
+Edge feature dim: 4, Hidden channels: 128
+EGNN(
+  (first_layer): Linear(in_features=11, out_features=128, bias=True)
+  (nl): SiLU()
+  (predictor1): Sequential(
+    (0): Linear(in_features=128, out_features=128, bias=True)
+    (1): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): SiLU()
+    (3): Linear(in_features=128, out_features=128, bias=True)
+  )
+  (predictor2): Sequential(
+    (0): Linear(in_features=128, out_features=128, bias=True)
+    (1): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): SiLU()
+    (3): Linear(in_features=128, out_features=1, bias=True)
+  )
+  (convs): ModuleList(
+    (0-6): 7 x EGNNLayer(128, 128)
+  )
+)
+Loaded pre-trained model from models/2024-03-13_19-24-01/EGNN_epoch_52.pt
+Running experiment for EGNN, training on 110831 samples for 54 epochs.
+Training on cuda.
+
+Model architecture:
+EGNN(
+  (first_layer): Linear(in_features=11, out_features=128, bias=True)
+  (nl): SiLU()
+  (predictor1): Sequential(
+    (0): Linear(in_features=128, out_features=128, bias=True)
+    (1): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): SiLU()
+    (3): Linear(in_features=128, out_features=128, bias=True)
+  )
+  (predictor2): Sequential(
+    (0): Linear(in_features=128, out_features=128, bias=True)
+    (1): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): SiLU()
+    (3): Linear(in_features=128, out_features=1, bias=True)
+  )
+  (convs): ModuleList(
+    (0-6): 7 x EGNNLayer(128, 128)
+  )
+)
+Total parameters: 754184
+Training data being saved to: results/2024-03-15_14-02-52_EGNN.pkl
+Model being saved to: models/2024-03-15_14-02-52/
+
+Start training:
+Epoch: 001, LR: 0.0001000, Loss: 0.0003768, Val Error: 0.0097345, Test Error: 0.0094667
+Epoch: 002, LR: 0.0001000, Loss: 0.0003956, Val Error: 0.0167794, Test Error: 0.0094667
+Epoch: 003, LR: 0.0001000, Loss: 0.0003290, Val Error: 0.0092762, Test Error: 0.0091936
+Epoch: 004, LR: 0.0001000, Loss: 0.0003124, Val Error: 0.0103606, Test Error: 0.0091936
+Epoch: 005, LR: 0.0001000, Loss: 0.0003259, Val Error: 0.0108967, Test Error: 0.0091936
+Epoch: 006, LR: 0.0001000, Loss: 0.0003205, Val Error: 0.0141504, Test Error: 0.0091936
+Epoch: 007, LR: 0.0001000, Loss: 0.0003476, Val Error: 0.0214852, Test Error: 0.0091936
+Epoch: 008, LR: 0.0001000, Loss: 0.0002893, Val Error: 0.0107174, Test Error: 0.0091936
+Epoch: 009, LR: 0.0001000, Loss: 0.0002826, Val Error: 0.0317360, Test Error: 0.0091936
+Epoch: 010, LR: 0.0000700, Loss: 0.0002327, Val Error: 0.0167205, Test Error: 0.0091936
+Epoch: 011, LR: 0.0000700, Loss: 0.0002629, Val Error: 0.0122876, Test Error: 0.0091936
+Epoch: 012, LR: 0.0000700, Loss: 0.0002757, Val Error: 0.0335470, Test Error: 0.0091936
+Epoch: 013, LR: 0.0000700, Loss: 0.0003573, Val Error: 0.0135809, Test Error: 0.0091936
+Epoch: 014, LR: 0.0000700, Loss: 0.0002493, Val Error: 0.0218300, Test Error: 0.0091936
+Epoch: 015, LR: 0.0000700, Loss: 0.0002314, Val Error: 0.0124280, Test Error: 0.0091936
+Epoch: 016, LR: 0.0000490, Loss: 0.0002353, Val Error: 0.0210637, Test Error: 0.0091936
+Epoch: 017, LR: 0.0000490, Loss: 0.0002075, Val Error: 0.0248561, Test Error: 0.0091936
+Epoch: 018, LR: 0.0000490, Loss: 0.0002242, Val Error: 0.0149930, Test Error: 0.0091936
+Epoch: 019, LR: 0.0000490, Loss: 0.0002032, Val Error: 0.0199963, Test Error: 0.0091936
+Epoch: 020, LR: 0.0000490, Loss: 0.0002020, Val Error: 0.0133936, Test Error: 0.0091936
+Epoch: 021, LR: 0.0000490, Loss: 0.0002089, Val Error: 0.0110983, Test Error: 0.0091936
+Epoch: 022, LR: 0.0000343, Loss: 0.0001840, Val Error: 0.0125024, Test Error: 0.0091936
+Epoch: 023, LR: 0.0000343, Loss: 0.0001855, Val Error: 0.0130370, Test Error: 0.0091936
+Epoch: 024, LR: 0.0000343, Loss: 0.0001877, Val Error: 0.0235875, Test Error: 0.0091936
+Stopping early due to no improvement in validation error for 21 epochs.
+
+Done! Training took 10.58 minutes. Best validation error: 0.0092762, corresponding test error: 0.0091936.
+Best model saved to: models/2024-03-15_14-02-52/EGNN_epoch_3.pt
+Training data saved to: results/2024-03-15_14-02-52_EGNN.pkl

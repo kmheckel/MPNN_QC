@@ -1,0 +1,63 @@
+
+
+PREDICTING TARGET 1 
+
+Namespace(debugging=False, spatial=True, batch_size=128, num_layers=3, hidden_channels=180, nn_width_factor=2, M=3, initial_lr=0.0001, report_interval=1, num_epochs=60, patience=21, aggr='s2s', target=1, predict_all=False, use_branching=False, model_name='gat', num_towers=0, pre_trained_path='models/2024-03-12_03-41-10/GNN_epoch_46.pt', data_split=1000, egnn=False, device=device(type='cuda')) 
+
+Created dataset splits with 110831 training, 10000 validation, 10000 test samples.
+Input channels: 11, Output channels: 1, 
+Edge feature dim: 5, Hidden channels: 180
+Loaded pre-trained model from models/2024-03-12_03-41-10/GNN_epoch_46.pt
+Running experiment for GNN, training on 110831 samples for 60 epochs.
+Training on cuda.
+
+Model architecture:
+GNN(
+  (first_layer): Linear(in_features=11, out_features=180, bias=True)
+  (gru): GRU(180, 180)
+  (nl): SiLU()
+  (conv): GATv2Conv(180, 180, heads=4)
+  (aggr): Set2Set(180, 360)
+  (out): Sequential(
+    (0): Linear(in_features=360, out_features=180, bias=True)
+    (1): BatchNorm1d(180, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): SiLU()
+    (3): Linear(in_features=180, out_features=1, bias=True)
+  )
+)
+Total parameters: 918541
+Training data being saved to: results/2024-03-15_10-42-01_GNN.pkl
+Model being saved to: models/2024-03-15_10-42-01/
+
+Start training:
+Epoch: 001, LR: 0.0001000, Loss: 0.0170960, Val Error: 1.1421057, Test Error: 1.1347519
+Epoch: 002, LR: 0.0001000, Loss: 0.0170340, Val Error: 0.9446489, Test Error: 0.9470464
+Epoch: 003, LR: 0.0001000, Loss: 0.0170200, Val Error: 0.4231135, Test Error: 0.4296740
+Epoch: 004, LR: 0.0001000, Loss: 0.0173368, Val Error: 0.4594651, Test Error: 0.4296740
+Epoch: 005, LR: 0.0001000, Loss: 0.0164965, Val Error: 0.3226657, Test Error: 0.3257760
+Epoch: 006, LR: 0.0001000, Loss: 0.0162055, Val Error: 3.2398061, Test Error: 0.3257760
+Epoch: 007, LR: 0.0001000, Loss: 0.0160545, Val Error: 1.5663851, Test Error: 0.3257760
+Epoch: 008, LR: 0.0001000, Loss: 0.0160051, Val Error: 1.0778905, Test Error: 0.3257760
+Epoch: 009, LR: 0.0001000, Loss: 0.0153897, Val Error: 0.4193785, Test Error: 0.3257760
+Epoch: 010, LR: 0.0001000, Loss: 0.0158062, Val Error: 0.5276795, Test Error: 0.3257760
+Epoch: 011, LR: 0.0001000, Loss: 0.0166564, Val Error: 0.7593158, Test Error: 0.3257760
+Epoch: 012, LR: 0.0000700, Loss: 0.0156486, Val Error: 0.5797446, Test Error: 0.3257760
+Epoch: 013, LR: 0.0000700, Loss: 0.0149696, Val Error: 0.3824351, Test Error: 0.3257760
+Epoch: 014, LR: 0.0000700, Loss: 0.0158629, Val Error: 0.3408032, Test Error: 0.3257760
+Epoch: 015, LR: 0.0000700, Loss: 0.0155149, Val Error: 0.3457437, Test Error: 0.3257760
+Epoch: 016, LR: 0.0000700, Loss: 0.0160991, Val Error: 1.4032547, Test Error: 0.3257760
+Epoch: 017, LR: 0.0000700, Loss: 0.0158401, Val Error: 0.5039690, Test Error: 0.3257760
+Epoch: 018, LR: 0.0000490, Loss: 0.0146095, Val Error: 0.7633093, Test Error: 0.3257760
+Epoch: 019, LR: 0.0000490, Loss: 0.0143093, Val Error: 0.3443175, Test Error: 0.3257760
+Epoch: 020, LR: 0.0000490, Loss: 0.0145834, Val Error: 0.4422109, Test Error: 0.3257760
+Epoch: 021, LR: 0.0000490, Loss: 0.0141281, Val Error: 0.3873837, Test Error: 0.3257760
+Epoch: 022, LR: 0.0000490, Loss: 0.0141410, Val Error: 0.8854748, Test Error: 0.3257760
+Epoch: 023, LR: 0.0000490, Loss: 0.0146797, Val Error: 0.4476834, Test Error: 0.3257760
+Epoch: 024, LR: 0.0000343, Loss: 0.0145126, Val Error: 0.5070662, Test Error: 0.3257760
+Epoch: 025, LR: 0.0000343, Loss: 0.0137137, Val Error: 0.3516962, Test Error: 0.3257760
+Epoch: 026, LR: 0.0000343, Loss: 0.0140771, Val Error: 1.0090830, Test Error: 0.3257760
+Stopping early due to no improvement in validation error for 21 epochs.
+
+Done! Training took 11.58 minutes. Best validation error: 0.3226657, corresponding test error: 0.3257760.
+Best model saved to: models/2024-03-15_10-42-01/GNN_epoch_5.pt
+Training data saved to: results/2024-03-15_10-42-01_GNN.pkl
