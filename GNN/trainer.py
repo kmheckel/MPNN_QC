@@ -14,7 +14,10 @@ def train(model, args):
         data = data.to(args.device)
         args.optimizer.zero_grad()
         y_pred = model(data)
-        loss = F.mse_loss(y_pred, data.y)
+        # paper's original loss is MSE!
+        # loss = F.mse_loss(y_pred, data.y)
+        # if using the EGNN direction
+        loss = F.l1_loss(y_pred, (data.y - args.mean) / args.spread)
         loss.backward()
         loss_all += loss.item() * data.num_graphs
         args.optimizer.step()
@@ -27,7 +30,9 @@ def eval(model, loader, args):
         data = data.to(args.device)
         with torch.no_grad():
             y_pred = model(data)
-            error += (y_pred * args.std - data.y * args.std).abs().sum().item()
+            # error += (y_pred * args.spread - data.y * args.spread).abs().sum().item()
+            # if using the EGNN direction
+            error += (y_pred * args.spread + args.mean - data.y).abs().sum().item()
     return error / len(loader.dataset) / args.output_channels
 
 def eval_multi_pred(model, loader, args):
@@ -37,7 +42,9 @@ def eval_multi_pred(model, loader, args):
         data = data.to(args.device)
         with torch.no_grad():
             y_pred = model(data)
-            error += (y_pred * args.std - data.y * args.std).abs().sum(axis=0)
+            # error += (y_pred * args.spread - data.y * args.spread).abs().sum(axis=0)
+            # if using the EGNN direction
+            error += (y_pred * args.spread + args.mean - data.y).abs().sum(axis=0)
     return error / len(loader.dataset)
 
 def run_experiment(model, args):

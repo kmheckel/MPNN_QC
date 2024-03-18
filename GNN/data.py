@@ -41,9 +41,16 @@ def get_data(args, loc_transform):
     path = osp.join(osp.dirname(osp.realpath(__file__)), '..', 'data', 'QM9')
     dataset = QM9(path, transform=transform).shuffle()
     mean = dataset.data.y[20000:].mean(dim=0, keepdim=True)
-    std = dataset.data.y[20000:].std(dim=0, keepdim=True)
-    dataset.data.y = (dataset.data.y - mean) / std
-    args.std = std[:, args.target].to(args.device)
+    if args.standardization == 'std':
+        spread = dataset.data.y[20000:].std(dim=0, keepdim=True)
+    elif args.standardization == 'mad':
+        ma = torch.abs(dataset.data.y[20000:] - mean)
+        spread = ma.mean(dim=0, keepdim=True)
+    else:
+        raise ValueError(f"Standardization method {args.standardization} not recognized.")
+    # original
+    # dataset.data.y = (dataset.data.y - mean) / spread
+    args.spread = spread[:, args.target].to(args.device)
     args.mean = mean[:, args.target].to(args.device)
     
     if not args.debugging:

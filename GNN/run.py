@@ -1,7 +1,7 @@
 import torch
 import models
 import argparse
-from trainer import run_experiment, eval_multi_pred
+from trainer import run_experiment
 from distutils.util import strtobool
 from data import get_data
 import copy
@@ -11,7 +11,6 @@ def str2bool(v):
 
 parser = argparse.ArgumentParser(description='Running MLMI4 experiments')
 
-# set arguments for training and decoding. 
 parser.add_argument('--debugging', type=str2bool, default='False', help="If True uses 1000 samples")
 parser.add_argument('--spatial', type=str2bool, default='True', help="Use spatial info?")
 parser.add_argument('--batch_size', type=int, default=128)
@@ -31,17 +30,17 @@ parser.add_argument('--model_name', type=str, default='NNConv', help="GGNN/NNCon
 parser.add_argument('--num_towers', type=int, default=8, help="Number of towers in the model, 0 for no towers")
 parser.add_argument('--pre_trained_path', type=str, default='', help="Path to existing model")
 parser.add_argument('--data_split', type=int, default=1000, help="Number of samples in the dataset when debugging")
+parser.add_argument('--standardization', type=str, default='std', help="std: y-->(y-mean)/std, mad: y-->(y-mean)/mad")
 args = parser.parse_args()
 
 torch.cuda.empty_cache()
 if args.debugging:
     print("Running in debugging mode.")
     args.batch_size = 128
-    args.num_epochs = 2
+    args.num_epochs = 5
     args.patience = 5
-    args.num_layers = 1
-    args.hidden_channels = 16 #74
-    args.initial_lr = 1e-3
+    args.num_layers = 2
+    args.hidden_channels = 32
 
 if 'egnn' in args.model_name.lower():
     args.egnn = True
@@ -99,7 +98,8 @@ if args.pre_trained_path:
                                          map_location=torch.device(args.device)))
         print(f"Loaded pre-trained model from {args.pre_trained_path}")
     except:
-        print(f"Could not load pre-trained model from {args.pre_trained_path}, make sure to initialise the model with the same architecture!")
+        raise Exception(f"Could not load pre-trained model from {args.pre_trained_path}, make sure to initialise the model with the same architecture!")
+
 args.model_name = type(model).__name__
 torch.compile(model, dynamic=True)
 run_experiment(model, args)
