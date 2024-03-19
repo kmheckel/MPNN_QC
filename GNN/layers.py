@@ -5,109 +5,82 @@ from torch_scatter import scatter
 
 class EGNNLayer(MessagePassing):
     """
-    Implementation of the EGNN (Equivariant Graph Neural Network) layer.
-
-    Args:
-        in_channels (int): Number of input channels.
-        hidden_channels (int): Number of hidden channels.
-        edge_dim (int, optional): Dimensionality of edge features. Defaults to 4.
-        aggr (str, optional): Aggregation method for message passing. Defaults to 'sum'.
-
-    Attributes:
-        in_channels (int): Number of input channels.
-        out_channels (int): Number of output channels.
-        aggregation (str): Aggregation method for message passing.
-        mlp_msg (torch.nn.Sequential): MLP for message computation.
-        mlp_upd (torch.nn.Sequential): MLP for node update.
-
+    Equivariant Graph Neural Network layer, implementing message passing with attention and equivariance to node permutations.
+    This layer processes node features, node positions, and edge attributes to update node features while considering geometric relations.
     """
 
     def __init__(self, in_channels, hidden_channels, edge_dim=4, aggr='mean'):
+        # Initialize the base MessagePassing class with the aggregation method.
         super().__init__(aggr=aggr)
-
+        
+        # Input and output channel sizes.
         self.in_channels = in_channels
         self.out_channels = hidden_channels
+        # The aggregation method used for message passing.
         self.aggregation = aggr
 
+        # MLP for message computation combining node features, edge attributes, and geometric information.
         self.mlp_msg = Sequential(
-            Linear(2*hidden_channels + edge_dim + 1, hidden_channels), BatchNorm1d(hidden_channels), SiLU(),
-            Linear(hidden_channels, hidden_channels), BatchNorm1d(hidden_channels), SiLU()
+            Linear(2 * hidden_channels + edge_dim + 1, hidden_channels),
+            BatchNorm1d(hidden_channels),
+            SiLU(),
+            Linear(hidden_channels, hidden_channels),
+            BatchNorm1d(hidden_channels),
+            SiLU()
         )
+        # MLP for node updates based on aggregated messages and original node features.
         self.mlp_upd = Sequential(
-            Linear(2*hidden_channels, hidden_channels), BatchNorm1d(hidden_channels), SiLU(),
+            Linear(2 * hidden_channels, hidden_channels),
+            BatchNorm1d(hidden_channels),
+            SiLU(),
             Linear(hidden_channels, hidden_channels),
         )
-        self.att_mlp = Sequential(Linear(hidden_channels, 1), Sigmoid())
+        # MLP for computing attention weights based on message features.
+        self.att_mlp = Sequential(
+            Linear(hidden_channels, 1),
+            Sigmoid()
+        )
 
     def forward(self, x, pos, edge_index, edge_attr=None):
         """
-        Forward pass of the EGNN layer.
-
-        Args:
-            x (torch.Tensor): Node features.
-            pos (torch.Tensor): Node positions.
-            edge_index (torch.Tensor): Edge indices.
-            edge_attr (torch.Tensor, optional): Edge features. Defaults to None.
-
-        Returns:
-            torch.Tensor: Updated node features.
-
+        Propagates node features and edge attributes through the graph to update node features.
         """
+        # Call the propagate method from MessagePassing, which internally calls message, aggregate, and update methods.
         out = self.propagate(edge_index, x=x, edge_attr=edge_attr, pos=pos)
         return out
 
     def message(self, x_i, x_j, pos, edge_index, edge_attr):
         """
-        Message computation for the EGNN layer.
-
-        Args:
-            x_i (torch.Tensor): Source node features.
-            x_j (torch.Tensor): Target node features.
-            pos (torch.Tensor): Node positions.
-            edge_index (torch.Tensor): Edge indices.
-            edge_attr (torch.Tensor): Edge features.
-
-        Returns:
-            torch.Tensor: Computed messages.
-
+        Constructs messages for each edge in the graph by combining features of the source and target nodes,
+        their relative positions, and edge attributes.
         """
+        # Compute relative positions between connected nodes.
         pos_i = pos[edge_index[1]]  # Target node positions
         pos_j = pos[edge_index[0]]  # Source node positions
-        rel_pos = pos_i - pos_j  # Relative positions
-        rel_pos_norm = (torch.norm(rel_pos, p=2, dim=-1) ** 2).unsqueeze(-1)
+        rel_pos = pos_i - pos_j  # Relative positions vector
+        rel_pos_norm = (torch.norm(rel_pos, p=2, dim=-1) ** 2).unsqueeze(-1)  # Squared Euclidean norm
+
+        # Concatenate node features, edge attributes, and relative position information.
         msg = torch.cat([x_i, x_j, edge_attr, rel_pos_norm], dim=-1)
+        # Pass the concatenated vector through an MLP.
         msg = self.mlp_msg(msg)
+        # Apply attention to the message.
         msg = msg * self.att_mlp(msg)
         return msg
 
     def aggregate(self, inputs, index):
         """
-        Aggregation of messages for the EGNN layer.
-
-        Args:
-            inputs (torch.Tensor): Messages.
-            index (torch.Tensor): Node indices.
-
-        Returns:
-            torch.Tensor: Aggregated messages.
-
+        Aggregates messages at target nodes using the specified aggregation method.
         """
-        msg = inputs
-        aggr_msg = scatter(msg, index, dim=self.node_dim, reduce=self.aggregation)
+        # Aggregate messages using the scatter operation provided by torch_scatter, based on the aggregation method specified.
+        aggr_msg = scatter(inputs, index, dim=self.node_dim, reduce=self.aggregation)
         return aggr_msg
 
     def update(self, inputs, x):
         """
-        Node update for the EGNN layer.
-
-        Args:
-            inputs (torch.Tensor): Aggregated messages.
-            x (torch.Tensor): Node features.
-
-        Returns:
-            torch.Tensor: Updated node features.
-
+        Updates node features by combining the original features with aggregated messages.
         """
-        aggr_msg = inputs
-        upd_out = torch.cat([x, aggr_msg], dim=-1)
+        # Concatenate original node features with aggregated messages.
+        upd_out = torch.cat([x, inputs], dim=-1)
+        # Apply an MLP to the concatenated vector and add residual connection.
         return x + self.mlp_upd(upd_out)
