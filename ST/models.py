@@ -345,7 +345,6 @@ class Encoder(nn.Module):
                     num_embeddings=config.vocab_size,
                     features=config.emb_dim,
                     embedding_init=nn.initializers.normal(stddev=1.0),
-                    dtype=config.dtype
             )
         else:
             input_embed = self.shared_embedding
